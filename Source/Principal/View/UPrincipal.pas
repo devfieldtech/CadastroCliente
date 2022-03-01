@@ -135,7 +135,6 @@ type
     StringColEstado: TStringColumn;
     chkSemNumero: TCheckBox;
     Editar: TMenuItem;
-    Email: TMenuItem;
     FDStanStorageXMLLink1: TFDStanStorageXMLLink;
     procedure btnConfirmarMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Single);
@@ -277,23 +276,26 @@ end;
 
 procedure TfrmPrincipal.EditarClick(Sender: TObject);
 begin
- vTipo :=2;
- Cliente.FiltraCPF(vCpf);
- edtNome.Text           :=Cliente.Nome;
- edtCep.Text            :=Cliente.CEP;
- EdtLogradouro.Text     :=Cliente.Logradouro;
- edtNumero.Text         :=Cliente.Numero;
- edtComplemento.Text    :=Cliente.Complemento;
- edtBairro.Text         :=Cliente.Bairro;
- edtCidade.Text         :=Cliente.Localidade;
- edtEstado.Text         :=Cliente.UF;
- edtPais.Text           :=Cliente.Pais;
- edtTelefone.Text       :=Cliente.Telefone;
- edtEmail.Text          :=Cliente.Email;
- edtRG.Text             :=Cliente.RG;
- edtCPF.Text            :=Cliente.CPF;
- chkSemNumero.IsChecked := Cliente.Numero='0';
- tbPrincipal.ActiveTab  := tbiCad;
+ if vCpf.Length>0 then
+ begin
+   vTipo :=2;
+   Cliente.FiltraCPF(vCpf);
+   edtNome.Text           :=Cliente.Nome;
+   edtCep.Text            :=Cliente.CEP;
+   EdtLogradouro.Text     :=Cliente.Logradouro;
+   edtNumero.Text         :=Cliente.Numero;
+   edtComplemento.Text    :=Cliente.Complemento;
+   edtBairro.Text         :=Cliente.Bairro;
+   edtCidade.Text         :=Cliente.Localidade;
+   edtEstado.Text         :=Cliente.UF;
+   edtPais.Text           :=Cliente.Pais;
+   edtTelefone.Text       :=Cliente.Telefone;
+   edtEmail.Text          :=Cliente.Email;
+   edtRG.Text             :=Cliente.RG;
+   edtCPF.Text            :=Cliente.CPF;
+   chkSemNumero.IsChecked := Cliente.Numero='0';
+   tbPrincipal.ActiveTab  := tbiCad;
+ end;
 end;
 
 procedure TfrmPrincipal.edtCepKeyUp(Sender: TObject; var Key: Word;
@@ -349,39 +351,43 @@ end;
 
 procedure TfrmPrincipal.ExcluirClick(Sender: TObject);
 begin
- MessageDlg('Deseja Realmente Deletar esse Registro?', System.UITypes.TMsgDlgType.mtInformation,
-   [System.UITypes.TMsgDlgBtn.mbYes,
-   System.UITypes.TMsgDlgBtn.mbNo
-   ], 0,
-   procedure(const AResult: System.UITypes.TModalResult)
-   begin
-    case AResult of
-     mrYES:
+  if vCpf.Length>0 then
+  begin
+    MessageDlg('Deseja Realmente Deletar esse Registro?', System.UITypes.TMsgDlgType.mtInformation,
+     [System.UITypes.TMsgDlgBtn.mbYes,
+     System.UITypes.TMsgDlgBtn.mbNo
+     ], 0,
+     procedure(const AResult: System.UITypes.TModalResult)
      begin
-       Cliente := TCliente.Create;
-       Cliente.DeletaCpfCadastrado(vCpf);
-       Cliente.Free;
-       GeraLista('');
-     end;
-     mrNo:
-    end;
-   end);
+      case AResult of
+       mrYES:
+       begin
+         Cliente := TCliente.Create;
+         Cliente.DeletaCpfCadastrado(vCpf);
+         Cliente.Free;
+         GeraLista('');
+       end;
+       mrNo:
+      end;
+     end);
+  end;
 end;
 
 
 procedure TfrmPrincipal.FormCreate(Sender: TObject);
 begin
  vPathDados := ExtractFilePath(ParamStr(0))+'data.Json';
- Cliente := TCliente.Create;
 end;
 
 procedure TfrmPrincipal.FormDestroy(Sender: TObject);
 begin
- Cliente.vMemCliente.SaveToFile(vPathDados);
+ if Cliente.vMemCliente.RecordCount>0 then
+  Cliente.vMemCliente.SaveToFile(vPathDados);
 end;
 
 procedure TfrmPrincipal.FormShow(Sender: TObject);
 begin
+ Cliente := TCliente.Create;
  GeraLista('');
  tbPrincipal.TabPosition := TTabPosition.None;
  tbPrincipal.ActiveTab   := tbiLista;
